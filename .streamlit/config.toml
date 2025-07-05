@@ -1,0 +1,17 @@
+[theme]
+primaryColor = "#6c63ff"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f0f2f6"
+textColor = "#000000"
+font = "sans serif"
+
+[server]
+headless = true
+
+[client]
+showSidebarNavigation = true
+
+[menu]
+# Page names for sidebar
+home = "Home"
+pages = ["Assessment"]
