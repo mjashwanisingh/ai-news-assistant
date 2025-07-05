@@ -69,7 +69,7 @@ if not st.session_state.logged_in:
         if AUTHORIZED_USERS.get(username) == password:
             st.session_state.logged_in = True
             st.success("✅ Logged in successfully!")
-            st.experimental_rerun()  # Optional: rerun AFTER state is saved
+           st.rerun()  # Optional: rerun AFTER state is saved
         else:
             st.error("❌ Invalid credentials")
     st.stop()
