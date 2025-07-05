@@ -180,7 +180,6 @@ with tab1:
     else:
         st.error("❌ PDF not found. Please click 'Generate PDF' first.")
 
-
 with tab2:
     st.header("📊 News Dashboard")
     all_news = []
