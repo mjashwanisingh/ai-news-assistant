@@ -46,6 +46,12 @@ rss_sources = {
     "BBC": "http://feeds.bbci.co.uk/news/world/rss.xml",
     "Al Jazeera": "https://www.aljazeera.com/xml/rss/all.xml"
 }
+hindi_sources = {
+    "Aaj Tak": "https://aajtak.intoday.in/rssfeed/hindi-news.xml",
+    "Amar Ujala": "https://www.amarujala.com/rss/india-news.xml",
+    "Dainik Bhaskar": "https://www.bhaskar.com/rss-feed/2328/",
+    "Zee News (Hindi)": "https://zeenews.india.com/hindi/rss/india.xml"
+}
 
 # === Fetching News ===
 def fetch_rss_news(name, url):
@@ -200,9 +206,11 @@ tab1, tab2, tab3 = st.tabs(["📰 News", "📊 Dashboard", "🔍 Search"])
 
 with tab1:
     if st.button("Fetch News"):
-        local_news, national_news, global_news = [], [], []
+        local_news, national_news, global_news, hindi_news = [], [], [], []
         for source, url in rss_sources.items():
             rss = fetch_rss_news(source, url)
+        for source, url in hindi_sources.items():
+            hindi_news += fetch_rss_news(source, url)
             if source in ["NDTV", "ANI"]:
                 local_news += rss
             elif source in ["PIB", "Indian Express", "The Hindu"]:
@@ -225,6 +233,10 @@ with tab1:
             st.subheader(f"{category} News")
             for item in data[:5]:
                 display_news_card(item)
+                st.subheader("🗞️ Hindi News")
+            for item in hindi_news[:5]:
+                display_news_card(item)
+
 
         if st.button("Generate PDF"):
             pdf_file = create_pdf(st.session_state.local_news, st.session_state.national_news, st.session_state.global_news)
