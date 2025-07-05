@@ -1,31 +1,38 @@
 import streamlit as st
 import random
 
-# 🔐 LOGIN SECTION
+# 🔐 Login and sidebar visibility state
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
 if "show_sidebar" not in st.session_state:
-    st.session_state.show_sidebar = False  # default: hidden
+    st.session_state.show_sidebar = False
 
-# 🔒 Hide sidebar if not logged in or if manually hidden
+# 🛠️ Delayed rerun trigger
+if "trigger_rerun" not in st.session_state:
+    st.session_state.trigger_rerun = False
+
+# 🔒 Hide sidebar unless logged in and enabled
 if not st.session_state.logged_in or not st.session_state.show_sidebar:
-    st.markdown(
-        """
+    st.markdown("""
         <style>
             [data-testid="stSidebar"] {
                 display: none;
             }
         </style>
-        """,
-        unsafe_allow_html=True
-    )
+    """, unsafe_allow_html=True)
 
-# ✅ Toggle button (only show if logged in)
+# ✅ Show toggle only after login
 if st.session_state.logged_in:
-    if st.button("☰ Toggle Sidebar"):
+    if st.button("☰"):
         st.session_state.show_sidebar = not st.session_state.show_sidebar
-        st.experimental_rerun()
+        st.session_state.trigger_rerun = True
+
+# ⏱️ Delayed rerun to avoid early error
+if st.session_state.trigger_rerun:
+    st.session_state.trigger_rerun = False
+    st.experimental_rerun()
+
 
 st.set_page_config(page_title="📝 Assessment", page_icon="📝", layout="wide")
 
