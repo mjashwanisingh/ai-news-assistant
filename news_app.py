@@ -184,7 +184,7 @@ with tab1:
                                   [st.session_state.local_news, st.session_state.national_news, st.session_state.global_news]):
             st.subheader(f"{category} News")
             for item in data[:10]:  # or for item in results
-    display_news_card(item)
+                display_news_card(item)
 
         if st.button("Generate PDF"):
             pdf_file = create_pdf(st.session_state.local_news, st.session_state.national_news, st.session_state.global_news)
