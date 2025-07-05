@@ -10,6 +10,26 @@ from email.message import EmailMessage
 import pandas as pd
 import plotly.express as px
 
+def display_news_card(item):
+    title = item.get("title", "No title")
+    summary = item.get("summary", "No summary")
+    url = item.get("url", "#")
+    image = item.get("urlToImage", "") or "https://via.placeholder.com/150"
+
+    st.markdown(f"""
+        <div style="border:1px solid #ddd; border-radius:10px; padding:15px; margin-bottom:15px; background-color:#fff;">
+            <div style="display:flex; gap:15px;">
+                <img src="{image}" width="150" style="border-radius:8px;" />
+                <div style="flex:1;">
+                    <h4 style="margin:0;">{title}</h4>
+                    <p style="margin-top:5px; font-size:14px; color:#444;">{summary}</p>
+                    <a href="{url}" target="_blank" style="font-weight:bold; font-size:13px;">🔗 Read Full Story</a>
+                </div>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+
+
 # 🔐 Login
 AUTHORIZED_USERS = {
     "majorashwanisingh": st.secrets.get("APP_LOGIN_PASSWORD", "1234")
@@ -163,10 +183,8 @@ with tab1:
         for category, data in zip(["Local", "National", "Global"],
                                   [st.session_state.local_news, st.session_state.national_news, st.session_state.global_news]):
             st.subheader(f"{category} News")
-            for item in data[:5]:
-                st.markdown(f"**{item['title']}**")
-                st.write(item["summary"])
-                st.markdown(f"[Read more]({item['url']})")
+            for item in data[:10]:  # or for item in results
+    display_news_card(item)
 
         if st.button("Generate PDF"):
             pdf_file = create_pdf(st.session_state.local_news, st.session_state.national_news, st.session_state.global_news)
