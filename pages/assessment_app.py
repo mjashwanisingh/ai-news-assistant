@@ -2,6 +2,7 @@
 import streamlit as st
 import random
 
+st.set_page_config(page_title="📝 Assessment", page_icon="📝", layout="wide")
 st.set_page_config(page_title="📝 News Quiz - Daily Current Affairs", layout="wide")
 
 st.title("🧠 Daily Current Affairs Assessment (40 MCQs)")
@@ -43,10 +44,16 @@ score = 0
 
 st.subheader("📋 Answer the following:")
 
-for i, q in enumerate(quiz_data, 1):
-    st.markdown(f"**Q{i}: {q['question']}**")
-    user_answers[i] = st.radio("", q["options"], key=f"q{i}")
-    st.markdown("---")
+if st.button("✅ Submit Quiz"):
+    st.subheader("📊 Results")
+    score = 0
+    for i, q in enumerate(quiz_data, 1):
+        if user_answers[i] == q["answer"]:
+            st.success(f"✅ Q{i} is Correct!")
+            score += 1
+        else:
+            st.error(f"❌ Q{i} is Wrong. Correct Answer: {q['answer']}")
+    st.info(f"🎯 Your Score: {score} / {len(quiz_data)}")
 
 # Submit button
 if st.button("✅ Submit Quiz"):
