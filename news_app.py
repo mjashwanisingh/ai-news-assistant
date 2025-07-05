@@ -10,6 +10,22 @@ from email.message import EmailMessage
 import pandas as pd
 import plotly.express as px
 
+import streamlit as st
+
+# Check login status
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+# 🔒 If not logged in, hide sidebar using custom CSS
+if not st.session_state.logged_in:
+    hide_sidebar_style = """
+        <style>
+            [data-testid="stSidebar"] {
+                display: none;
+            }
+        </style>
+    """
+    st.markdown(hide_sidebar_style, unsafe_allow_html=True)
 
 # === LOGIN ===
 AUTHORIZED_USERS = {
