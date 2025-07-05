@@ -35,7 +35,7 @@ if st.session_state.trigger_rerun:
 # MCQ portion 
 st.set_page_config(page_title="📝 Assessment", page_icon="📝", layout="wide")
 
-st.title("🧠 Daily Current Affairs Assessment (40 MCQs)")
+st.title("🧠 Daily Current Affairs Assessment (10 MCQs)")
 st.info("10 questions each from Local, National, Global, and Hindi news — great for UPSC/SSC/Defence/etc.")
 
 # Fetch news from session
