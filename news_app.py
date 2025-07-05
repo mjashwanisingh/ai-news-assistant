@@ -124,22 +124,54 @@ def create_pdf(local, national, global_):
 
     pdf = FPDF()
     pdf.add_page()
-    pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, clean("Daily News Summary"), ln=True, align='C')
+
+    # Header Title
+    pdf.set_font("Arial", 'B', 16)
+    pdf.set_text_color(0, 0, 0)
+    pdf.cell(200, 10, clean("📰 Daily News Summary"), ln=True, align='C')
+
+    pdf.set_font("Arial", '', 12)
     pdf.cell(200, 10, clean(f"Date: {datetime.now().strftime('%d-%m-%Y')}"), ln=True, align='C')
-    pdf.ln(10)
+    pdf.ln(5)
 
     def section(title, news_list):
-        pdf.set_font("Arial", 'B', 14)
-        pdf.cell(200, 10, clean(title), ln=True)
-        pdf.set_font("Arial", size=12)
-        for item in news_list[:5]:
-            t = clean(item.get("title", "No title"))
-            s = clean(item.get("summary", "No summary"))
-            u = clean(item.get("url", ""))
-            pdf.multi_cell(0, 10, f"{t}\n{s}\n{u}\n")
-            pdf.ln(2)
-        pdf.ln(5)
+        # Section Header (colored background)
+        pdf.set_fill_color(50, 50, 50)   # Dark gray
+        pdf.set_text_color(255, 255, 255)  # White text
+        pdf.set_font("Arial", 'B', 13)
+        pdf.cell(0, 10, clean(title), ln=True, fill=True)
+        pdf.ln(2)
+
+        for i, item in enumerate(news_list[:5], start=1):
+            title = clean(item.get("title", "No title"))
+            summary = clean(item.get("summary", ""))
+            url = clean(item.get("url", ""))
+
+            # Draw border box
+            x = pdf.get_x()
+            y = pdf.get_y()
+            box_width = 190
+            box_height = 25 + (summary.count('\n') + 1) * 7
+            pdf.set_draw_color(180, 180, 180)
+            pdf.rect(x, y, box_width, box_height + 15)
+
+            # News Title
+            pdf.set_xy(x + 2, y + 2)
+            pdf.set_font("Arial", 'B', 12)
+            pdf.set_text_color(0, 0, 0)
+            pdf.multi_cell(0, 8, f"{i}. {title}")
+
+            # Summary
+            pdf.set_font("Arial", '', 11)
+            pdf.set_text_color(50, 50, 50)
+            pdf.multi_cell(0, 7, summary)
+
+            # Link
+            pdf.set_font("Arial", 'I', 10)
+            pdf.set_text_color(0, 0, 200)
+            pdf.multi_cell(0, 7, url)
+
+            pdf.ln(5)
 
     section("Local News", local)
     section("National News", national)
@@ -268,3 +300,26 @@ if AUTO_MODE:
     global_news += tweets[10:]
     pdf_file = create_pdf(local_news, national_news, global_news)
     send_email(RECEIVER_EMAIL, pdf_file, SENDER_EMAIL, APP_PASSWORD)
+
+    # === Auto Mode (For Scheduled Runs)
+if AUTO_MODE:
+    local_news, national_news, global_news = [], [], []
+
+    for source, url in rss_sources.items():
+        rss = fetch_rss_news(source, url)
+        if source in ["NDTV", "ANI"]:
+            local_news += rss
+        elif source in ["PIB", "Indian Express", "The Hindu"]:
+            national_news += rss
+        else:
+            global_news += rss
+
+    global_news += fetch_newsapi_news()
+    tweets = fetch_tweets(["ndtv", "ANI", "PMOIndia", "BBCWorld", "RahulGandhi", "narendramodi", "POTUS"])
+    local_news += tweets[:5]
+    national_news += tweets[5:10]
+    global_news += tweets[10:]
+
+    pdf_file = create_pdf(local_news, national_news, global_news)
+    send_email(RECEIVER_EMAIL, pdf_file, SENDER_EMAIL, APP_PASSWORD)
+
