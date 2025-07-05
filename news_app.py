@@ -173,9 +173,13 @@ with tab1:
             with open(pdf_file, "rb") as f:
                 st.download_button("⬇️ Download PDF", f, file_name=pdf_file)
         if st.button("Send Email"):
-            pdf_file = f"news_summary_{datetime.now().strftime('%Y%m%d')}.pdf"
-            send_email(RECEIVER_EMAIL, pdf_file, SENDER_EMAIL, APP_PASSWORD)
-            st.success("📧 Email sent!")
+    pdf_file = f"news_summary_{datetime.now().strftime('%Y%m%d')}.pdf"
+    if os.path.exists(pdf_file):
+        send_email(RECEIVER_EMAIL, pdf_file, SENDER_EMAIL, APP_PASSWORD)
+        st.success("📧 Email sent!")
+    else:
+        st.error("❌ PDF not found. Please click 'Generate PDF' first.")
+
 
 with tab2:
     st.header("📊 News Dashboard")
