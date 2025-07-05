@@ -57,7 +57,7 @@ hindi_sources = {
 def fetch_rss_news(name, url):
     feed = feedparser.parse(url)
     articles = []
-    for entry in feed.entries[:5]:
+    for entry in feed.entries[:15]:
         articles.append({
             "title": entry.title,
             "summary": entry.get("summary", ""),
@@ -148,7 +148,7 @@ def create_pdf(local, national, global_):
         pdf.cell(0, 10, clean(title), ln=True, fill=True)
         pdf.ln(2)
 
-        for i, item in enumerate(news_list[:5], start=1):
+        for i, item in enumerate(news_list[:15], start=1):
             title = clean(item.get("title", "No title"))
             summary = clean(item.get("summary", ""))
             url = clean(item.get("url", ""))
@@ -269,7 +269,7 @@ if "local_news" in st.session_state:
     # ✅ Hindi News shown separately
     if "hindi_news" in st.session_state:
         st.subheader("🗞️ Hindi News")
-        for item in st.session_state.hindi_news[:10]:
+        for item in st.session_state.hindi_news[:15]:
             display_news_card(item)
 
 
@@ -363,9 +363,9 @@ if AUTO_MODE:
 
     global_news += fetch_newsapi_news()
     tweets = fetch_tweets(["ndtv", "ANI", "PMOIndia", "BBCWorld", "RahulGandhi", "narendramodi", "POTUS"])
-    local_news += tweets[:5]
-    national_news += tweets[5:10]
-    global_news += tweets[10:]
+    local_news += tweets[20:50]
+    national_news += tweets[20:50]
+    global_news += tweets[20:50]
 
     pdf_file = create_pdf(local_news, national_news, global_news)
     send_email(RECEIVER_EMAIL, pdf_file, SENDER_EMAIL, APP_PASSWORD)
