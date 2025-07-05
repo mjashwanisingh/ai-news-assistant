@@ -3,3 +3,5 @@ feedparser
 fpdf
 snscrape
 requests
+pandas
+plotly
