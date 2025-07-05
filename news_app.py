@@ -10,6 +10,8 @@ from email.message import EmailMessage
 
 import streamlit as st
 
+AUTO_MODE = os.getenv("SCHEDULE_RUN", "false").lower() == "true"
+
 # Hardcoded credentials (or use st.secrets)
 AUTHORIZED_USERS = {
     "admin": st.secrets.get("APP_LOGIN_PASSWORD", "1234")
@@ -192,3 +194,29 @@ if st.button("📰 Fetch News Now"):
         pdf_file = f"news_summary_{datetime.now().strftime('%Y%m%d')}.pdf"
         send_email(RECEIVER_EMAIL, pdf_file, SENDER_EMAIL, APP_PASSWORD)
         st.success("📧 Email sent successfully!")
+
+if AUTO_MODE:
+    local_news, national_news, global_news = [], [], []
+
+    for source, url in rss_sources.items():
+        rss = fetch_rss_news(source, url)
+        if source in ["NDTV", "ANI"]:
+            local_news += rss
+        elif source in ["PIB", "Indian Express", "The Hindu"]:
+            national_news += rss
+        else:
+            global_news += rss
+
+    global_news += fetch_newsapi_news()
+
+    tweets = fetch_tweets([
+        "ndtv", "ANI", "PMOIndia", "BBCWorld", "ArvindKejriwal",
+        "RahulGandhi", "narendramodi", "POTUS"
+    ])
+    local_news += tweets[:5]
+    national_news += tweets[5:10]
+    global_news += tweets[10:]
+
+    pdf_file = create_pdf(local_news, national_news, global_news)
+    send_email(RECEIVER_EMAIL, pdf_file, SENDER_EMAIL, APP_PASSWORD)
+
