@@ -169,17 +169,19 @@ with tab1:
                 st.markdown(f"[Read more]({item['url']})")
 
         if st.button("Generate PDF"):
-            pdf_file = create_pdf(st.session_state.local_news, st.session_state.national_news, st.session_state.global_news)
-            with open(pdf_file, "rb") as f:
-                st.download_button("⬇️ Download PDF", f, file_name=pdf_file)
-        if st.button("Send Email"):
+    pdf_file = create_pdf(st.session_state.local_news, st.session_state.national_news, st.session_state.global_news)
+    with open(pdf_file, "rb") as f:
+        st.download_button("⬇️ Download PDF", f, file_name=pdf_file)
+
+    # ✅ Send Email button (independent)
+    if st.button("Send Email"):
     pdf_file = f"news_summary_{datetime.now().strftime('%Y%m%d')}.pdf"
     if os.path.exists(pdf_file):
         send_email(RECEIVER_EMAIL, pdf_file, SENDER_EMAIL, APP_PASSWORD)
         st.success("📧 Email sent!")
     else:
         st.error("❌ PDF not found. Please click 'Generate PDF' first.")
-
+    
 with tab2:
     st.header("📊 News Dashboard")
     all_news = []
