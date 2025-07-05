@@ -10,19 +10,17 @@ from email.message import EmailMessage
 import pandas as pd
 import plotly.express as px
 
+import streamlit as st
 
-# 🔐 Login and sidebar visibility state
+# 🔐 Login and sidebar visibility
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
-
 if "show_sidebar" not in st.session_state:
     st.session_state.show_sidebar = False
-
-# 🛠️ Delayed rerun trigger
 if "trigger_rerun" not in st.session_state:
     st.session_state.trigger_rerun = False
 
-# 🔒 Hide sidebar unless logged in and enabled
+# Hide sidebar unless logged in and toggle is ON
 if not st.session_state.logged_in or not st.session_state.show_sidebar:
     st.markdown("""
         <style>
@@ -32,16 +30,17 @@ if not st.session_state.logged_in or not st.session_state.show_sidebar:
         </style>
     """, unsafe_allow_html=True)
 
-# ✅ Show toggle only after login
+# Show toggle only after login
 if st.session_state.logged_in:
     if st.button("☰"):
         st.session_state.show_sidebar = not st.session_state.show_sidebar
         st.session_state.trigger_rerun = True
 
-# ⏱️ Delayed rerun to avoid early error
+# Rerun on next frame
 if st.session_state.trigger_rerun:
     st.session_state.trigger_rerun = False
-    st.experimental_rerun()
+    st.rerun()  # ✅ use this, NOT experimental_rerun()
+
 
 # === LOGIN ===
 AUTHORIZED_USERS = {
