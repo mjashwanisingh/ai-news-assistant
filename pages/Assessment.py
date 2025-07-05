@@ -47,7 +47,7 @@ hindi_news = st.session_state.get("hindi_news", [])
 # ✅ MCQ generator
 def generate_mcqs(news_list, category):
     questions = []
-    for idx, item in enumerate(news_list[:10]):
+    for idx, item in enumerate(news_list[:3]):
         title = item.get("title", "No title")
         base_question = f"What is the main subject of this {category} news?\n\n📰 '{title}'"
         options = random.sample(["Politics", "Economy", "Crime", "Technology", "Environment", "International"], 4)
