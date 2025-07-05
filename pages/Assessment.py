@@ -1,8 +1,6 @@
 import streamlit as st
 import random
 
-import streamlit as st
-
 # 🔐 LOGIN SECTION
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
