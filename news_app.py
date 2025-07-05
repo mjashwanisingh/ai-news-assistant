@@ -10,27 +10,7 @@ from email.message import EmailMessage
 import pandas as pd
 import plotly.express as px
 
-def display_news_card(item):
-    title = item.get("title", "No title")
-    summary = item.get("summary", "No summary")
-    url = item.get("url", "#")
-    image = item.get("urlToImage", "") or "https://via.placeholder.com/150"
-
-    st.markdown(f"""
-        <div style="border:1px solid #ddd; border-radius:10px; padding:15px; margin-bottom:15px; background-color:#fff;">
-            <div style="display:flex; gap:15px;">
-                <img src="{image}" width="150" style="border-radius:8px;" />
-                <div style="flex:1;">
-                    <h4 style="margin:0;">{title}</h4>
-                    <p style="margin-top:5px; font-size:14px; color:#444;">{summary}</p>
-                    <a href="{url}" target="_blank" style="font-weight:bold; font-size:13px;">🔗 Read Full Story</a>
-                </div>
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
-
-
-# 🔐 Login
+# === LOGIN ===
 AUTHORIZED_USERS = {
     "majorashwanisingh": st.secrets.get("APP_LOGIN_PASSWORD", "1234")
 }
@@ -67,7 +47,7 @@ rss_sources = {
     "Al Jazeera": "https://www.aljazeera.com/xml/rss/all.xml"
 }
 
-# === Functions ===
+# === Fetching News ===
 def fetch_rss_news(name, url):
     feed = feedparser.parse(url)
     articles = []
@@ -87,11 +67,12 @@ def fetch_newsapi_news():
         return []
     articles = response.json().get("articles", [])
     return [{
-        "title": a['title'],
-        "summary": a.get('description', ''),
-        "url": a['url'],
-        "source": a.get('source', {}).get('name', 'NewsAPI')
-    } for a in articles if a['title']]
+        "title": a.get("title"),
+        "summary": a.get("description", ""),
+        "url": a.get("url"),
+        "source": a.get("source", {}).get("name", "NewsAPI"),
+        "urlToImage": a.get("urlToImage") or "https://via.placeholder.com/150"
+    } for a in articles if a.get("title")]
 
 def fetch_tweets(accounts):
     os.makedirs("tweets", exist_ok=True)
@@ -113,11 +94,31 @@ def fetch_tweets(accounts):
             st.warning(f"⚠️ Error fetching from @{acc}: {e}")
     return news
 
+# === News Card UI ===
+def display_news_card(item):
+    title = item.get("title", "No title")
+    summary = item.get("summary", "No summary")
+    url = item.get("url", "#")
+    image = item.get("urlToImage", "") or "https://via.placeholder.com/150"
+    st.markdown(f"""
+        <div style="border:1px solid #333; border-radius:10px; padding:15px; margin-bottom:15px; background-color:#1e1e1e;">
+            <div style="display:flex; gap:15px;">
+                <img src="{image}" width="150" style="border-radius:8px;" />
+                <div style="flex:1;">
+                    <h4 style="margin:0; color:#f2f2f2;">{title}</h4>
+                    <p style="margin-top:5px; font-size:14px; color:#ccc;">{summary}</p>
+                    <a href="{url}" target="_blank" style="font-weight:bold; font-size:13px; color:#58a6ff;">📎 Read Full Story</a>
+                </div>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+
+# === PDF Generator ===
 def create_pdf(local, national, global_):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, "Daily News Summary", ln=True, align='C')
+    pdf.cell(200, 10, "📰 Daily News Summary", ln=True, align='C')
     pdf.cell(200, 10, f"Date: {datetime.now().strftime('%d-%m-%Y')}", ln=True, align='C')
     pdf.ln(10)
 
@@ -126,19 +127,21 @@ def create_pdf(local, national, global_):
         pdf.cell(200, 10, title, ln=True)
         pdf.set_font("Arial", size=12)
         for item in news_list[:5]:
-            t = item["title"].encode('ascii', errors='ignore').decode()
-            s = item["summary"].encode('ascii', errors='ignore').decode()
+            t = item["title"].encode("latin-1", errors="ignore").decode()
+            s = item["summary"].encode("latin-1", errors="ignore").decode()
             url = item.get("url", "")
-            pdf.multi_cell(0, 10, f"{t}\n{s}\n{url}\n")
+            pdf.multi_cell(0, 10, f"📰 {t}\n{s}\n🔗 {url}\n")
+            pdf.ln(2)
         pdf.ln(5)
 
-    section("Local News", local)
-    section("National News", national)
-    section("Global News", global_)
+    section("🏡 Local News", local)
+    section("🇮🇳 National News", national)
+    section("🌍 Global News", global_)
     filename = f"news_summary_{datetime.now().strftime('%Y%m%d')}.pdf"
     pdf.output(filename)
     return filename
 
+# === EMAIL ===
 def send_email(receiver_email, attachment_path, sender_email, app_password):
     msg = EmailMessage()
     msg["Subject"] = "📄 Your Daily News Summary"
@@ -151,14 +154,13 @@ def send_email(receiver_email, attachment_path, sender_email, app_password):
         smtp.login(sender_email, app_password)
         smtp.send_message(msg)
 
-# === UI ===
+# === Streamlit Tabs ===
 st.set_page_config(page_title="🧠 AI News Assistant", layout="wide")
 tab1, tab2, tab3 = st.tabs(["📰 News", "📊 Dashboard", "🔍 Search"])
 
 with tab1:
     if st.button("Fetch News"):
         local_news, national_news, global_news = [], [], []
-
         for source, url in rss_sources.items():
             rss = fetch_rss_news(source, url)
             if source in ["NDTV", "ANI"]:
@@ -167,13 +169,11 @@ with tab1:
                 national_news += rss
             else:
                 global_news += rss
-
         global_news += fetch_newsapi_news()
         tweets = fetch_tweets(["ndtv", "ANI", "PMOIndia", "BBCWorld", "RahulGandhi", "narendramodi", "POTUS"])
         local_news += tweets[:5]
         national_news += tweets[5:10]
         global_news += tweets[10:]
-
         st.session_state.local_news = local_news
         st.session_state.national_news = national_news
         st.session_state.global_news = global_news
@@ -183,7 +183,7 @@ with tab1:
         for category, data in zip(["Local", "National", "Global"],
                                   [st.session_state.local_news, st.session_state.national_news, st.session_state.global_news]):
             st.subheader(f"{category} News")
-            for item in data[:10]:  # or for item in results
+            for item in data[:5]:
                 display_news_card(item)
 
         if st.button("Generate PDF"):
@@ -211,12 +211,14 @@ with tab2:
                 "Source": item.get("source", "Unknown"),
                 "Title": item["title"]
             })
+
     if all_news:
         df = pd.DataFrame(all_news)
-        st.subheader("News Count by Category")
+
+        st.subheader("🟦 News Count by Category")
         st.bar_chart(df["Category"].value_counts())
 
-        st.subheader("Sources Distribution")
+        st.subheader("📊 Source Distribution")
         fig = px.pie(df, names="Source", title="News Source Share")
         st.plotly_chart(fig)
     else:
@@ -227,20 +229,20 @@ with tab3:
     query = st.text_input("Enter keyword")
     if query:
         results = []
-        for item in st.session_state.get("local_news", []) + st.session_state.get("national_news", []) + st.session_state.get("global_news", []):
+        for item in st.session_state.get("local_news", []) + \
+                    st.session_state.get("national_news", []) + \
+                    st.session_state.get("global_news", []):
             title = str(item.get("title", "") or "")
             summary = str(item.get("summary", "") or "")
             if query.lower() in title.lower() or query.lower() in summary.lower():
                 results.append(item)
         if results:
             for r in results:
-                st.markdown(f"**{r['title']}**")
-                st.write(r["summary"])
-                st.markdown(f"[Link]({r['url']})")
+                display_news_card(r)
         else:
             st.warning("No news found for that keyword.")
 
-# === Auto Mode (Scheduler)
+# === Auto Mode (Scheduled Mode e.g. for CRON or deployment)
 if AUTO_MODE:
     local_news, national_news, global_news = [], [], []
     for source, url in rss_sources.items():
