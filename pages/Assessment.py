@@ -1,6 +1,34 @@
 import streamlit as st
 import random
 
+import streamlit as st
+
+# 🔐 LOGIN SECTION
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if "show_sidebar" not in st.session_state:
+    st.session_state.show_sidebar = False  # default: hidden
+
+# 🔒 Hide sidebar if not logged in or if manually hidden
+if not st.session_state.logged_in or not st.session_state.show_sidebar:
+    st.markdown(
+        """
+        <style>
+            [data-testid="stSidebar"] {
+                display: none;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+# ✅ Toggle button (only show if logged in)
+if st.session_state.logged_in:
+    if st.button("☰ Toggle Sidebar"):
+        st.session_state.show_sidebar = not st.session_state.show_sidebar
+        st.experimental_rerun()
+
 st.set_page_config(page_title="📝 Assessment", page_icon="📝", layout="wide")
 
 st.title("🧠 Daily Current Affairs Assessment (40 MCQs)")
