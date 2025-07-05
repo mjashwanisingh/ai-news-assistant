@@ -205,37 +205,72 @@ st.set_page_config(page_title="🧠 AI News Assistant", layout="wide")
 tab1, tab2, tab3 = st.tabs(["📰 News", "📊 Dashboard", "🔍 Search"])
 
 with tab1:
-    if st.button("Fetch News"):
-        local_news, national_news, global_news, hindi_news = [], [], [], []
-        for source, url in rss_sources.items():
-            rss = fetch_rss_news(source, url)
-        for source, url in hindi_sources.items():
-            hindi_news += fetch_rss_news(source, url)
-            if source in ["NDTV", "ANI"]:
-                local_news += rss
-            elif source in ["PIB", "Indian Express", "The Hindu"]:
-                national_news += rss
-            else:
-                global_news += rss
-        global_news += fetch_newsapi_news()
-        tweets = fetch_tweets(["ndtv", "ANI", "PMOIndia", "BBCWorld", "RahulGandhi", "narendramodi", "POTUS"])
-        local_news += tweets[:5]
-        national_news += tweets[5:10]
-        global_news += tweets[10:]
-        st.session_state.local_news = local_news
-        st.session_state.national_news = national_news
-        st.session_state.global_news = global_news
-        st.success("✅ News fetched successfully!")
+   if st.button("Fetch News"):
+    local_news, national_news, global_news, hindi_news = [], [], [], []
 
-    if "local_news" in st.session_state:
-        for category, data in zip(["Local", "National", "Global"],
-                                  [st.session_state.local_news, st.session_state.national_news, st.session_state.global_news]):
-            st.subheader(f"{category} News")
-            for item in data[:5]:
-                display_news_card(item)
-                st.subheader("🗞️ Hindi News")
-            for item in hindi_news[:5]:
-                display_news_card(item)
+    # Extended RSS sources
+    rss_sources.update({
+        "Hindustan Times": "https://www.hindustantimes.com/feeds/rss/topnews/rssfeed.xml",
+        "Economic Times": "https://economictimes.indiatimes.com/rssfeedsdefault.cms",
+        "Deccan Herald": "https://www.deccanherald.com/rss-feed/10551",
+    })
+
+    hindi_sources = {
+        "Aaj Tak": "https://aajtak.intoday.in/rssfeed/hindi-news.xml",
+        "Amar Ujala": "https://www.amarujala.com/rss/india-news.xml",
+        "Dainik Bhaskar": "https://www.bhaskar.com/rss-feed/2328/",
+        "Zee News (Hindi)": "https://zeenews.india.com/hindi/rss/india.xml"
+    }
+
+    # ✅ Fetch English & Categorize
+    for source, url in rss_sources.items():
+        rss = fetch_rss_news(source, url)
+        if source in ["NDTV", "ANI"]:
+            local_news += rss
+        elif source in ["PIB", "Indian Express", "The Hindu"]:
+            national_news += rss
+        else:
+            global_news += rss
+
+    # ✅ Fetch Hindi News
+    for source, url in hindi_sources.items():
+        hindi_news += fetch_rss_news(source, url)
+
+    # ✅ NewsAPI + X Handles
+    global_news += fetch_newsapi_news()
+
+    tweets = fetch_tweets([
+        "ndtv", "ANI", "PMOIndia", "BBCWorld", "RahulGandhi", "narendramodi",
+        "POTUS", "PTI_News", "aajtak", "ZeeNews", "timesofindia", "IndiaToday", "EconomicTimes"
+    ])
+    local_news += tweets[:5]
+    national_news += tweets[5:10]
+    global_news += tweets[10:15]
+    hindi_news += tweets[15:]
+
+    # ✅ Store in session
+    st.session_state.local_news = local_news
+    st.session_state.national_news = national_news
+    st.session_state.global_news = global_news
+    st.session_state.hindi_news = hindi_news
+
+    st.success("✅ News fetched successfully!")
+
+# === Display UI Cards
+if "local_news" in st.session_state:
+    for category, data in zip(
+        ["Local", "National", "Global"],
+        [st.session_state.local_news, st.session_state.national_news, st.session_state.global_news]
+    ):
+        st.subheader(f"{category} News")
+        for item in data[:5]:
+            display_news_card(item)
+
+    # ✅ Hindi News shown separately
+    if "hindi_news" in st.session_state:
+        st.subheader("🗞️ Hindi News")
+        for item in st.session_state.hindi_news[:5]:
+            display_news_card(item)
 
 
         if st.button("Generate PDF"):
