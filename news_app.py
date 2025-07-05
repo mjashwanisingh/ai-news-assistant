@@ -8,6 +8,30 @@ from datetime import datetime
 import smtplib
 from email.message import EmailMessage
 
+import streamlit as st
+
+# Hardcoded credentials (or use st.secrets)
+AUTHORIZED_USERS = {
+    "admin": st.secrets.get("APP_LOGIN_PASSWORD", "1234")
+}
+
+# Simple login form
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if not st.session_state.logged_in:
+    st.title("🔐 Login Required")
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+    if st.button("Login"):
+        if AUTHORIZED_USERS.get(username) == password:
+            st.session_state.logged_in = True
+            st.success("✅ Logged in successfully!")
+        else:
+            st.error("❌ Invalid credentials")
+    st.stop()
+
+
 # === SETTINGS ===
 NEWSAPI_KEY = st.secrets["NEWSAPI_KEY"]
 SENDER_EMAIL = st.secrets["SENDER_EMAIL"]
