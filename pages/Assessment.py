@@ -32,16 +32,19 @@ if st.session_state.trigger_rerun:
     st.session_state.trigger_rerun = False
     st.rerun()  # ✅ use this, NOT experimental_rerun()
 
+# MCQ portion 
 st.set_page_config(page_title="📝 Assessment", page_icon="📝", layout="wide")
 
 st.title("🧠 Daily Current Affairs Assessment (40 MCQs)")
 st.info("10 questions each from Local, National, Global, and Hindi news — great for UPSC/SSC/Defence/etc.")
 
+# Fetch news from session
 local_news = st.session_state.get("local_news", [])
 national_news = st.session_state.get("national_news", [])
 global_news = st.session_state.get("global_news", [])
 hindi_news = st.session_state.get("hindi_news", [])
 
+# ✅ MCQ generator
 def generate_mcqs(news_list, category):
     questions = []
     for idx, item in enumerate(news_list[:10]):
@@ -59,21 +62,31 @@ def generate_mcqs(news_list, category):
         })
     return questions
 
-quiz_data = (
-    generate_mcqs(local_news, "Local") +
-    generate_mcqs(national_news, "National") +
-    generate_mcqs(global_news, "Global") +
-    generate_mcqs(hindi_news, "Hindi")
-)
+# ✅ Store MCQs once in session to prevent refresh/reset issue
+if "quiz_data" not in st.session_state:
+    st.session_state.quiz_data = (
+        generate_mcqs(local_news, "Local") +
+        generate_mcqs(national_news, "National") +
+        generate_mcqs(global_news, "Global") +
+        generate_mcqs(hindi_news, "Hindi")
+    )
 
+quiz_data = st.session_state.quiz_data
 user_answers = {}
-st.subheader("📋 Answer the following:")
 
+# 🔄 Reset quiz
+if st.button("🔄 Start New Quiz"):
+    del st.session_state.quiz_data
+    st.rerun()
+
+# 📋 Show questions
+st.subheader("📋 Answer the following:")
 for i, q in enumerate(quiz_data, 1):
     st.markdown(f"**Q{i}: {q['question']}**")
     user_answers[i] = st.radio("Choose one:", q["options"], key=q["id"], index=None)
     st.markdown("---")
 
+# ✅ Submit button
 if st.button("✅ Submit Quiz"):
     score = 0
     st.subheader("📊 Results")
