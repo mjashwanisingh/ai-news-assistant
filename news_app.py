@@ -10,9 +10,6 @@ from email.message import EmailMessage
 import pandas as pd
 import plotly.express as px
 
-if st.button("📝 Assessment"):
-    st.experimental_rerun()
-    st.session_state.page = "assessment_app.py"
 
 # === LOGIN ===
 AUTHORIZED_USERS = {
