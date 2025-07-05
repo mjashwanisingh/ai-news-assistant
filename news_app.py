@@ -115,31 +115,36 @@ def display_news_card(item):
 
 # === PDF Generator ===
 def create_pdf(local, national, global_):
-    def safe(text):
-        return str(text).encode("latin-1", errors="ignore").decode()
+    import re
+
+    def clean(text):
+        if not text:
+            return ""
+        return re.sub(r'[^\x00-\xFF]+', '', str(text))
 
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, safe("📰 Daily News Summary"), ln=True, align='C')
-    pdf.cell(200, 10, safe(f"Date: {datetime.now().strftime('%d-%m-%Y')}"), ln=True, align='C')
+    pdf.cell(200, 10, clean("Daily News Summary"), ln=True, align='C')
+    pdf.cell(200, 10, clean(f"Date: {datetime.now().strftime('%d-%m-%Y')}"), ln=True, align='C')
     pdf.ln(10)
 
     def section(title, news_list):
         pdf.set_font("Arial", 'B', 14)
-        pdf.cell(200, 10, safe(title), ln=True)
+        pdf.cell(200, 10, clean(title), ln=True)
         pdf.set_font("Arial", size=12)
         for item in news_list[:5]:
-            t = safe(item.get("title", "No title"))
-            s = safe(item.get("summary", ""))
-            u = item.get("url", "")
-            pdf.multi_cell(0, 10, f"📰 {t}\n{s}\n🔗 {u}\n")
+            t = clean(item.get("title", "No title"))
+            s = clean(item.get("summary", "No summary"))
+            u = clean(item.get("url", ""))
+            pdf.multi_cell(0, 10, f"{t}\n{s}\n{u}\n")
             pdf.ln(2)
         pdf.ln(5)
 
-    section("🏡 Local News", local)
-    section("🇮🇳 National News", national)
-    section("🌍 Global News", global_)
+    section("Local News", local)
+    section("National News", national)
+    section("Global News", global_)
+
     filename = f"news_summary_{datetime.now().strftime('%Y%m%d')}.pdf"
     pdf.output(filename)
     return filename
