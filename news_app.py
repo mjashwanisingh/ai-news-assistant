@@ -210,7 +210,9 @@ with tab3:
     if query:
         results = []
         for item in st.session_state.get("local_news", []) + st.session_state.get("national_news", []) + st.session_state.get("global_news", []):
-            if query.lower() in item["title"].lower() or query.lower() in item["summary"].lower():
+            title = item.get("title", "")
+            summary = item.get("summary", "")
+            if query.lower() in title.lower() or query.lower() in summary.lower():
                 results.append(item)
         if results:
             for r in results:
