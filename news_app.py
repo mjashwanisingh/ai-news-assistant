@@ -46,19 +46,34 @@ if st.session_state.trigger_rerun:
 AUTHORIZED_USERS = {
     "majorashwanisingh": st.secrets.get("APP_LOGIN_PASSWORD", "1234")
 }
+
+# Check login state
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
+
 if not st.session_state.logged_in:
-    st.title("🔐 Login Required")
+    # Hide sidebar on login page
+    st.markdown("""
+        <style>
+            [data-testid="stSidebar"] {
+                display: none;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+
+    st.title("🔐 Login")
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
+
     if st.button("Login"):
         if AUTHORIZED_USERS.get(username) == password:
             st.session_state.logged_in = True
             st.success("✅ Logged in successfully!")
+            st.experimental_rerun()  # Optional: rerun AFTER state is saved
         else:
             st.error("❌ Invalid credentials")
     st.stop()
+
 
 # === SECRETS ===
 NEWSAPI_KEY = st.secrets["NEWSAPI_KEY"]
