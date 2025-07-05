@@ -10,7 +10,6 @@ from email.message import EmailMessage
 import pandas as pd
 import plotly.express as px
 
-import streamlit as st
 
 # 🔐 Login and sidebar visibility
 if "logged_in" not in st.session_state:
