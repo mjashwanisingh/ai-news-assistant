@@ -12,7 +12,7 @@ import plotly.express as px
 
 # 🔐 Login
 AUTHORIZED_USERS = {
-    "admin": st.secrets.get("APP_LOGIN_PASSWORD", "1234")
+    "majorashwanisingh": st.secrets.get("APP_LOGIN_PASSWORD", "1234")
 }
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
