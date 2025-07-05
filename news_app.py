@@ -115,22 +115,25 @@ def display_news_card(item):
 
 # === PDF Generator ===
 def create_pdf(local, national, global_):
+    def safe(text):
+        return str(text).encode("latin-1", errors="ignore").decode()
+
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, "📰 Daily News Summary", ln=True, align='C')
-    pdf.cell(200, 10, f"Date: {datetime.now().strftime('%d-%m-%Y')}", ln=True, align='C')
+    pdf.cell(200, 10, safe("📰 Daily News Summary"), ln=True, align='C')
+    pdf.cell(200, 10, safe(f"Date: {datetime.now().strftime('%d-%m-%Y')}"), ln=True, align='C')
     pdf.ln(10)
 
     def section(title, news_list):
         pdf.set_font("Arial", 'B', 14)
-        pdf.cell(200, 10, title, ln=True)
+        pdf.cell(200, 10, safe(title), ln=True)
         pdf.set_font("Arial", size=12)
         for item in news_list[:5]:
-            t = item["title"].encode("latin-1", errors="ignore").decode()
-            s = item["summary"].encode("latin-1", errors="ignore").decode()
-            url = item.get("url", "")
-            pdf.multi_cell(0, 10, f"📰 {t}\n{s}\n🔗 {url}\n")
+            t = safe(item.get("title", "No title"))
+            s = safe(item.get("summary", ""))
+            u = item.get("url", "")
+            pdf.multi_cell(0, 10, f"📰 {t}\n{s}\n🔗 {u}\n")
             pdf.ln(2)
         pdf.ln(5)
 
