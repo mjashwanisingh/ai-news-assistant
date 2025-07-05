@@ -243,10 +243,10 @@ with tab1:
         "ndtv", "ANI", "PMOIndia", "BBCWorld", "RahulGandhi", "narendramodi",
         "POTUS", "PTI_News", "aajtak", "ZeeNews", "timesofindia", "IndiaToday", "EconomicTimes"
     ])
-    local_news += tweets[:5]
-    national_news += tweets[5:10]
-    global_news += tweets[10:15]
-    hindi_news += tweets[15:]
+    local_news += tweets[20:50]
+    national_news += tweets[20:50]
+    global_news += tweets[20:50]
+    hindi_news += tweets[20:50]
 
     # ✅ Store in session
     st.session_state.local_news = local_news
@@ -263,13 +263,13 @@ if "local_news" in st.session_state:
         [st.session_state.local_news, st.session_state.national_news, st.session_state.global_news]
     ):
         st.subheader(f"{category} News")
-        for item in data[:5]:
+        for item in data[:15]:
             display_news_card(item)
 
     # ✅ Hindi News shown separately
     if "hindi_news" in st.session_state:
         st.subheader("🗞️ Hindi News")
-        for item in st.session_state.hindi_news[:5]:
+        for item in st.session_state.hindi_news[:10]:
             display_news_card(item)
 
 
